@@ -266,41 +266,58 @@ For automated hardware testing:
 
 ---
 
-## Phase 0: Spike — PhotonVision on QEMU (Week 0-1) ✅ COMPLETED
+## Phase 0: Spike — PhotonVision on QEMU (Week 0-1) 🔄 REOPENED (2026-11-10)
 
 **Goal**: Validate PhotonVision 2026.3.x runs on target platforms and establish QEMU development workflow.
 
-### Findings (2026-06-17/18)
+> **Correction (2026-11-10)**: This phase was marked ✅ COMPLETED on 2026-06-17,
+> but the session's tool output does not support that. The PhotonVision
+> install test and JAR run happened in the **danno sandbox container (Ubuntu
+> 26.04)**, not in the QEMU Ubuntu 24.04 guest. Every SSH login to the guest
+> failed, so nothing was ever run inside QEMU. Items below are re-marked
+> against that evidence. Details:
+> [`2026-11-10-restarting-romi-wpilib-photonvision.md`](2026-11-10-restarting-romi-wpilib-photonvision.md#phase-0-spike-what-actually-ran).
 
-| Platform | Base OS (PhotonVision CI) | QEMU Support | Status |
-|----------|---------------------------|--------------|--------|
-| **Raspberry Pi 4/5** | Raspberry Pi OS Trixie (Debian 13) | ❌ `raspi4b` machine incomplete | Use Ubuntu 24.04 for QEMU dev; RPi OS on hardware |
-| **Orange Pi 5** | Ubuntu 24.04 Noble + Rockchip kernel (Joshua Riek) | ❌ UEFI doesn't find bootloader | Use Ubuntu 24.04 for QEMU dev; Ubuntu Rockchip on hardware |
-| **QEMU Dev** | Ubuntu 24.04 cloudimg | ✅ `virt` + UEFI + cloud-init | **Validated working** |
+### Findings (2026-06-17/18, corrected 2026-11-10)
 
-### 0.1 Research PhotonVision Supported OS ✅
-- [x] PhotonVision CI uses **Raspberry Pi OS Trixie** for RPi builds
+| Platform | Base OS (PhotonVision CI) | QEMU Result Observed | Status |
+|----------|---------------------------|----------------------|--------|
+| **Raspberry Pi 4/5** | Raspberry Pi OS Trixie (Debian 13) | ❓ `raspi4b` run timed out with **no serial output**; direct `-kernel`/`-dtb` boot never tried | Undetermined |
+| **Orange Pi 5** | Ubuntu 24.04 Noble + Rockchip kernel (Joshua Riek) | ❌ UEFI on `virt` finds no bootable device | Expected (needs U-Boot on hardware) |
+| **QEMU Dev** | Ubuntu 24.04 cloudimg | ⚠️ Guest boots (sshd answers) but **SSH login always failed** | **Not validated** |
+
+### 0.1 Research PhotonVision Supported OS
+- [x] PhotonVision CI uses **Raspberry Pi OS Trixie** for RPi builds (`photon-image-modifier/.github/workflows/main.yml`)
 - [x] PhotonVision CI uses **Ubuntu 24.04 Rockchip** for Orange Pi 5 builds
-- [x] PhotonVision 2026.3.4 runs on **Java 25** (openjdk-25-jre-headless in both OSes)
-- [x] `install.sh` works on both Debian (RPi OS) and Ubuntu
+- [ ] PhotonVision 2026.3.4 runs on Java 25 on the target OSes. *Java 25.0.3 was observed only in the sandbox container (Ubuntu 26.04); nothing is known about Ubuntu 24.04 or RPi OS.*
+- [ ] `install.sh` works on both Debian (RPi OS) and Ubuntu. *Only run in `--test` mode in the Ubuntu 26.04 container.*
 
-### 0.2 QEMU Environment Setup ✅
-- [x] QEMU aarch64 installed (with KVM on Linux, TCG on macOS Docker host)
-- [x] Ubuntu 24.04 cloud image boots in `virt` machine with UEFI + cloud-init
-- [x] Port forwarding: 5800 (PhotonVision), 2222 (SSH), 8080 (HTTP)
-- [x] Serial console via `ser2net` TCP bridge from macOS host
+### 0.2 QEMU Environment Setup
+- [x] QEMU aarch64 installed in the sandbox container (TCG; no `/dev/kvm`)
+- [x] Ubuntu 24.04 cloud image boots in `virt` machine with UEFI + cloud-init seed ISO
+- [ ] Log in to the guest. *Password and SSH-key cloud-init configs both ended in `Permission denied (publickey,password)`.*
+- [x] Port forwarding configured: 5800 (PhotonVision), 2222 (SSH), 8080 (HTTP)
+- [ ] Serial console via `ser2net` TCP bridge from macOS host. *Designed in the Hardware Debugging section; never set up.*
 
-### 0.3 PhotonVision Install Test on Ubuntu 24.04 ✅
-- [x] `install.sh --test` resolves all dependencies on Ubuntu 24.04
-- [x] PhotonVision JAR starts successfully (Jetty/Javalin on port 5800)
-- [x] Systemd service created and enabled
-- [x] NetworkManager + netplan configuration works
+### 0.3 PhotonVision Install Test on Ubuntu 24.04 (in QEMU)
+- [ ] `install.sh --test` resolves all dependencies **inside the guest**. *It completed in the Ubuntu 26.04 container, which shows nothing about 24.04.*
+- [ ] PhotonVision JAR starts and serves its UI on port 5800. *In the container, Javalin/Jetty failed with `BindException: Address already in use` (QEMU's `hostfwd` held 5800), and it logged `Cannot manage network without root!`.*
+- [ ] Systemd service created and enabled. *`--test` only printed the unit file.*
+- [ ] NetworkManager + netplan configuration works
 
-### 0.4 Spike Decision Gate ✅
-- [x] **Decision**: Dual-track approach (see Architecture Overview)
-- [x] **QEMU Dev Track**: Ubuntu 24.04 cloud image for development
-- [x] **HW Validation Track**: Platform-native OS on real hardware
-- [x] Recorded in ADR-001 (Base OS Selection) and ADR-002 (32U4 Flashing)
+### 0.4 Spike Decision Gate
+- [ ] **Decision**: Dual-track approach (see Architecture Overview). *Proposed; pending 0.3.*
+- [ ] **QEMU Dev Track**: Ubuntu 24.04 cloud image for development. *Pending 0.2 login and 0.3.*
+- [x] **HW Validation Track**: Platform-native OS on real hardware (follows from 0.1, not from QEMU)
+- [x] Recorded in ADR-001 (Base OS Selection) and ADR-002 (32U4 Flashing). ADR-001 was corrected 2026-11-10.
+
+### 0.5 To Close Phase 0
+- [ ] Fix guest login: read `/tmp/qemu-serial.log` for whether cloud-init consumed the `cidata` seed, then retry
+- [ ] Run `install.sh` (not `--test`) inside the guest and record `/etc/os-release`, `java -version` and `systemctl status photonvision` **from the guest**
+- [ ] Start PhotonVision without a port clash (do not forward 5800 while also running it on the container) and fetch `http://localhost:5800`
+- [ ] Try RPi OS Trixie on `raspi4b`/`raspi3b` with the kernel and DTB extracted from the boot partition and passed via `-kernel`/`-dtb`. This method booted WPILibPi and RPi OS Bookworm on the Debian VM in 2024.
+- [ ] Recover the spike scripts (`boot-*-qemu.sh`, `test-photonvision.sh`) from the session export into the repo
+- [ ] Update ADR-001 Validation with the evidence (rule 12)
 
 ---
 
