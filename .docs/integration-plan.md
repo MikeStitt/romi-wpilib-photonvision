@@ -62,6 +62,31 @@ Bootable .img.xz + .sha256 + manifest.json (RPi 4/5)
 
 ---
 
+## Documentation Map (.docs/)
+
+All project documentation lives in `.docs/`:
+
+| Path | Purpose | Read When |
+|------|---------|-----------|
+| `constitution.md` | Project governing rules (working rules, engineering discipline, governance) | Every task |
+| `integration-plan.md` | This file — 13-week implementation plan with task checklist | Planning, progress tracking |
+| `README.md` | Project overview, quick start, architecture, contributing | Onboarding |
+| `architecture/ADR-001-base-os-selection.md` | Base OS decision: RPi OS Trixie for RPi 4/5 | Architecture decisions |
+| `architecture/ADR-002-32u4-flashing-approach.md` | 32U4 flashing via avrdude + systemd + Javalin REST | 32U4 implementation |
+| `architecture/ADR-003-photonvision-wifi-preservation.md` | WiFi preservation strategy for PhotonVision install | PhotonVision integration |
+| `parts/image-builder.md` | Image builder pipeline: stages, platform profiles, QEMU smoke test | Image building |
+| `parts/romi-dashboard.md` | Romi dashboard: Javalin+Vue, Gradle, NT4 bridge, FlashService | Dashboard development |
+| `parts/photonvision.md` | PhotonVision install, config, camera, hardware acceleration | PhotonVision integration |
+| `parts/wpilib.md` | WPILib/NT4 integration: NT4 client, topics, simulator setup | NT4 bridge development |
+| `parts/hardware-testing.md` | QEMU + hardware validation: serial/TCP bridge, checklists, CI | Testing & validation |
+| `parts/testing.md` | Testing strategy: bats/pytest/JUnit, CI integration, fixtures | Writing tests |
+| `parts/constitution-maintenance.md` | Constitution amendment workflow and changelog | Governance |
+| `research/xrp-vs-romi-analysis.md` | XRP vs Romi protocol comparison (corrected architecture) | Protocol decisions |
+| `research/wpiromi-component-analysis.md` | Factual WPILib component inventory on Pi (what runs where) | Component inventory |
+| `bibliography.md` | Source traceability: all claims → source files/URLs, assumptions | Audit trail |
+
+---
+
 ## Hardware Debugging Infrastructure
 
 ### Physical Network Topology (MacBook Pro M3, November 2023)
