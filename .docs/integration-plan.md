@@ -84,6 +84,7 @@ All project documentation lives in `.docs/`:
 | `research/xrp-vs-romi-analysis.md` | XRP vs Romi protocol comparison (corrected architecture) | Protocol decisions |
 | `research/wpiromi-component-analysis.md` | Factual WPILib component inventory on Pi (what runs where) | Component inventory |
 | `bibliography.md` | Source traceability: all claims → source files/URLs, assumptions | Audit trail |
+| `2026-11-10-restarting-romi-wpilib-photonvision.md` | Where earlier work lives (2024 VM, OpenCode session export), repo history repair | Resuming work, history questions |
 
 ---
 
