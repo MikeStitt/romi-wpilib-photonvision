@@ -79,11 +79,14 @@ The behavioral contract. Numbered for reference, not priority.
    task, summarize what was done, what is verified, and what is left. Don't
    continue from a state you can't describe back.
 10. **Mind the budget.** On non-trivial work, watch the token/time budget. If a
-    task is spiraling (e.g. debugging the same error repeatedly), stop,
+    task is spiraling (e.g debugging the same error repeatedly), stop,
     summarize, and restart fresh rather than overrun silently.
 11. **Verify before done.** Quality gates MUST be green before you declare a task
     complete. Tests are a first-class artifact (see
     [`parts/testing.md`](parts/testing.md)).
+12. **Validate assumptions by research or test.** Every architectural assumption
+    (e.g. "Romi runs robot code on Pi", "PhotonVision disables WiFi", "NT4 requires WebSocket") MUST be traced to a primary source (docs, source code, spec) or validated by experiment. Document the **source** and **why it is valid** in the relevant ADR or `bibliography.md`. Unvalidated assumptions are risks — surface them explicitly.
+13. **Document the "why", not just the "what".** Code comments, commit messages, ADRs, and PR descriptions MUST explain the reasoning behind decisions. A future maintainer should understand the constraints and trade-offs that led to a choice, not just the choice itself.
 
 ## Engineering Discipline
 
