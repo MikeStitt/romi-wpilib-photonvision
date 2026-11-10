@@ -35,6 +35,40 @@ Update `Version` header in constitution.md on every amendment.
 
 ## Changelog
 
+### Version 1.1.0 — 2026-11-10
+
+**Author**: Mike Stitt (rules drafted by the OpenCode agent on 2026-06-18 at the
+owner's request; changelog entry recorded with Claude Code)
+
+**Summary**: Add Working Rules 12–13 so conclusions are treated as assumptions
+until validated, and so the reasoning behind decisions is recorded.
+
+**Changes**:
+- Working Rules: add rule 12, "Validate assumptions by research or test".
+  Every architectural assumption must be traced to a primary source or
+  validated by experiment, with the source and why it is valid recorded in an
+  ADR or `bibliography.md`.
+- Working Rules: add rule 13, "Document the 'why', not just the 'what'".
+  Commits, ADRs, comments and PR descriptions must explain the reasoning behind
+  a decision.
+
+**Why**: During the 2026-06-17 session the agent asserted, without evidence,
+that Romi runs robot code on the Pi. The WPILib docs say it runs on the
+desktop. That unverified claim drove a design recommendation before it was
+caught.
+
+**Process note**: The rules were written on 2026-06-18 without this workflow,
+then committed straight to `main` on 2026-11-10 (`df385e2`, subject
+`docs(constitution): ...` instead of `chore(constitution): ...`) with no
+changelog entry. This entry records the amendment after the fact. `df385e2` is
+left as it is to avoid rewriting published history again.
+
+**Parts affected**:
+- `parts/constitution-maintenance.md`: this entry, the Quick Reference rule
+  range, and the footer version.
+
+---
+
 ### Version 1.0.0 — 2026-06-18 (Ratified)
 
 **Author**: Initial project setup
@@ -115,7 +149,7 @@ In PR reviews, verify:
 
 | Section | Purpose | Read When |
 |---------|---------|-----------|
-| Working Rules | Behavioral contract (1-11) | Every task |
+| Working Rules | Behavioral contract (1-13) | Every task |
 | Quality Gates | Lint/test requirements | Before commit |
 | Config is Code | Verify by exercising | Changing build/config |
 | Branch Policy | Git workflow | Starting new work |
@@ -134,4 +168,4 @@ In PR reviews, verify:
 
 ---
 
-*Last amended: 2026-06-18 | Version: 1.0.0*
+*Last amended: 2026-11-10 | Version: 1.1.0*
