@@ -92,6 +92,72 @@ the sandbox to a single file, streamed out with `base64` over
 **No build code was written.** `build-romi-image.sh`, the stage scripts and the
 dashboard described in the README and `integration-plan.md` do not exist yet.
 
+### Phase 0 Spike: What Actually Ran
+
+A review of the session's tool calls and outputs on 2026-11-10 found that the
+spike's summary, which marked Phase 0 "✅ COMPLETED" and checked off results in
+ADR-001 and `bibliography.md`, overstated what was tested. Everything below ran
+inside the danno sandbox container (no `/dev/kvm`, so QEMU used TCG).
+
+| Step (2026-06-17) | Observed in tool output |
+|-------------------|-------------------------|
+| RPi OS Trixie `2026-04-21` on `-M virt` + UEFI | UEFI found no boot device and fell through to PXE |
+| Same image on `-M raspi4b`, `-drive if=sd`, no `-kernel` | Timed out (120–240 s) with **no serial output** |
+| PhotonVision `orangepi5` image on `-M virt` + UEFI | `BdsDxe: No bootable option or device was found` |
+| Ubuntu 24.04 cloudimg on `-M virt` + UEFI + cloud-init seed ISO | Booted far enough for sshd to answer on port 2222 |
+| SSH into that guest (password hash, then fixed hash, then ed25519 key) | `Permission denied (publickey,password)` every time |
+| `install.sh --test --arch=aarch64 --version=v2026.3.4` | Completed, but **in the container**. The next command, `cat /etc/os-release`, shows **Ubuntu 26.04 LTS (resolute)** |
+| `java -jar photonvision-v2026.3.4-linuxarm64.jar` | **In the container**, on `openjdk 25.0.3` (Ubuntu 26.04). Logged `Cannot manage network without root!`, then Javalin/Jetty failed with `BindException: Address already in use`, because QEMU's `hostfwd=tcp::5800` held the port |
+
+The agent nonetheless reported "PhotonVision install.sh works natively on
+Ubuntu 24.04", "runs on Java 25 (openjdk-25-jre-headless in Ubuntu 24.04)" and
+"JAR starts successfully, Jetty/Javalin web server initializes". It is a
+concrete case of the unvalidated-conclusion problem that rule 12 was written to
+catch.
+
+**What is still supported by evidence**: PhotonVision's CI builds its RPi image
+from Raspberry Pi OS Trixie (`photon-image-modifier/.github/workflows/main.yml`,
+`2025-10-01-raspios-trixie-arm64-lite`). The Orange Pi 5 image does not boot on
+QEMU `virt` (expected, since it needs U-Boot).
+
+**A lead the spike missed**: QEMU's `raspi*` machines do not run the Pi GPU
+firmware, so a Pi image only boots when its kernel and DTB are passed directly.
+The 2024 Debian VM history shows exactly that working for WPILibPi
+2024.1.1-beta and RPi OS Bookworm (`-machine raspi3b -kernel kernel8.img -dtb
+bcm2710-rpi-3-b-plus.dtb`). It was never tried for Trixie.
+
+**Corrected on 2026-11-10**: `integration-plan.md` Phase 0 (reopened, with a
+0.5 checklist to close it), ADR-001 (status, findings, consequences,
+validation) and the matching `bibliography.md` row.
+
+**Spike scripts**: `boot-trixie-qemu.sh`, `boot-opi5-qemu.sh`,
+`boot-ubuntu-qemu.sh` and `test-photonvision.sh` existed only in the sandbox's
+`/tmp/rpi-images/`. Every revision is in the session export (`write` tool
+calls in `ses_128b28a91ffesO6QYY8E7TUmy5.json`) and can be recovered from
+there.
+
+### Other Findings in the Transcript
+
+- **Unanswered proposal**: the session ended with the agent offering to create
+  `.docs/standing-instructions.md`. It would be a file referenced from the
+  constitution as always-read, holding a pre-task checklist, branch/PR
+  reminders, a "cite the rules before acting" requirement and ADR triggers.
+  `.opencode/instructions.md` was the alternative. No decision was made.
+- **Agent's suggestions for constitution compliance**: require it to cite which
+  rules apply before a task, enforce `amend/` branches for constitution changes,
+  and ask for the changelog entry and commit message as proof before accepting
+  "done".
+- **Platform reversal not fully applied**: at 00:19 the plan was switched to
+  Orange Pi 5 only, and at 00:25 the owner reversed that (RPi 4/5 first, Orange
+  Pi 5 deferred). `integration-plan.md` reflects the reversal, but
+  `research/wpiromi-component-analysis.md` is still written for "Orange Pi 5
+  (Ubuntu 24.04)" only.
+- **Owner's hypothesis, not yet tested**: the WPILibPi Romi image has not been
+  updated since v2023.2.1 because building Raspberry Pi images through the
+  pi-gen stages, and keeping WPILib on the Pi current with Raspberry Pi OS
+  releases, is hard. (The 2023.2.1 Romi image still works with WPILib 2026 on
+  the PC.)
+
 ---
 
 ## Repository State at Restart
@@ -140,6 +206,16 @@ Still uncommitted on purpose:
 - `.danno-validator/` — danno model-validator reports from 2026-06-18.
 - `scratch/book-em-danno/` — a separate clone of the book-em-danno repo.
 
+### Follow-up the Same Day
+
+- The constitution amendment was recorded after the fact as **version 1.1.0**
+  in `parts/constitution-maintenance.md` (branch `amend/changelog-rules-12-13`).
+  The step-1 commit `df385e2` used `docs(constitution):` rather than the
+  required `chore(constitution):`. It is left as it is, since `main` was already
+  force-pushed once.
+- The Phase 0 corrections above were made on branch `docs/correct-phase0-spike`.
+- Both changes go through PRs this time, as the constitution requires.
+
 ## Open Items Found During the Restart
 
 - `ADR-003-photonvision-wifi-preservation.md` is listed in the documentation map
@@ -147,5 +223,9 @@ Still uncommitted on purpose:
 - `.docs/github.md` is an empty file.
 - Constitution rule 10 reads "e.g debugging" (missing period). The typo came in
   with the rule 12–13 edit.
-- Implementation has not started. The next concrete step in
-  `integration-plan.md` is the QEMU spike / Phase 0.
+- `.docs/constitution.md` has no `Version` header, although
+  `parts/constitution-maintenance.md` says to update one on every amendment.
+- Implementation has not started. Phase 0 is reopened, and its 0.5 checklist in
+  `integration-plan.md` is the next concrete work.
+- Decide on `.docs/standing-instructions.md` (see Other Findings).
+- Bring `research/wpiromi-component-analysis.md` in line with RPi 4/5 first.
