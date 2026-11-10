@@ -90,7 +90,7 @@
 | NT4 bridge (ntcore C++) works between Pi and PC | Test with RobotSim | Medium |
 | 32U4 firmware flash via avrdude works on RPi 4/5 | Test with real 32U4 board | High |
 | libcamera + RPi ISP tuning works for PhotonVision AprilTag | Test camera detection | High |
-| QEMU Ubuntu 24.04 cloudimg boots and runs PhotonVision | Already validated in spike | Done |
+| QEMU Ubuntu 24.04 cloudimg boots and runs PhotonVision | Log in to the guest, run `install.sh` and the JAR **in the guest** (2026-06-17 test actually ran in the Ubuntu 26.04 sandbox container; see Phase 0 correction) | High |
 
 ---
 
